@@ -158,3 +158,80 @@ Strategic impact minimal while computational savings substantial.
 ## Implementation Files
 
 (To be added: Bucket generation code, abstraction files, loading utilities)
+
+
+---
+
+## Implementation Details
+
+### Generated Abstraction File
+`holdem_100b.abs` (528MB) is tracked via Git LFS and stored in this directory. It maps every possible hand-board combination at every street to a bucket ID (0-99).
+
+### Cluster Environment
+All computation was performed on the Northeastern Discovery Cluster.
+- **Node:** `d0073`, `short` partition
+- **Resources:** 32 CPUs, 64GB RAM
+- **Compiler:** gcc/11.1.0, boost/1.80.0
+- **Repo:** `github.com/pandaant/poker-cfrm`
+- **Location on cluster:** `/home/mundhra.ve/poker_thesis/`
+
+### Prerequisites (Not Stored in Repo)
+
+Two large prerequisite files are required to regenerate the abstraction but are not stored in this repository due to size constraints.
+
+**1. handranks.dat (124MB)**
+
+A precomputed lookup table for O(1) poker hand evaluation (TwoPlusTwo evaluator).
+
+To obtain:
+```bash
+git clone https://github.com/christophschmalhofer/poker.git
+cp poker/XPokerEval/XPokerEval.TwoPlusTwo/HandRanks.dat poker-cfrm/handranks.dat
+```
+
+**2. ehs.dat (528MB)**
+
+A precomputed Expected Hand Strength table covering all hand-board combinations across all streets, generated via Monte Carlo simulation.
+
+To regenerate (submit as a cluster job, takes ~2 hours at 16 threads):
+```bash
+cd poker-cfrm/tools/ehs_gen
+make CXX=g++ CC=gcc
+./gen_eval_table
+mv ehs.dat ../../ehs.dat
+```
+
+### Compilation Notes
+
+The `poker-cfrm` codebase requires two fixes for compatibility with gcc/11.1.0. The compound literal array syntax used throughout is rejected by the newer compiler. In the following files, replace all instances of:
+```cpp
+assert(hand_indexer_init(1, (uint8_t[]) {2}, &indexer[0]));
+```
+with:
+```cpp
+uint8_t _c0[] = {2};
+assert(hand_indexer_init(1, _c0, &indexer[0]));
+```
+(and equivalently for the 3-, 4-, and 5-card variants)
+
+Affected files: `include/ehs_lookup.hpp`, `include/abstraction_generator.hpp`, `include/card_abstraction.hpp`, `src/abstraction_generator.cpp`, `tools/ehs_gen/src/gen_eval_table.cpp`, `tools/ehs_gen/include/ehs_lookup.hpp`
+
+Also add the Boost library path explicitly to the makefile `CPP_LIBRARIES` line:
+```
+-L/shared/centos7/boost/1.80.0/lib -lpthread -lboost_program_options
+```
+
+### Regenerating the Abstraction
+
+Once prerequisites are in place and the repo is compiled:
+```bash
+./cluster-abs \
+  --save-to holdem_100b.abs \
+  --buckets 1,100,100,100 \
+  --metric mixed_nooo \
+  --nb-samples 0,1000,1000,1000 \
+  --threads 32 \
+  --handranks /path/to/handranks.dat
+```
+
+Runtime: ~40 minutes at 32 threads on the Discovery cluster.
