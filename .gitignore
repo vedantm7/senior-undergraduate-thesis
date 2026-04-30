@@ -1,0 +1,15 @@
+*.o
+*.so
+*.bin
+*.regrets
+*.avg-strategy
+pure_cfr
+print_player_strategy
+pure_cfr_player
+__pycache__/
+*.pyc
+*.log
+*.err
+*.out
+holdem_100b.abs
+holdem_100b_cfrm.abs

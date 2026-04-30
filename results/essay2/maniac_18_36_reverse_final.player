@@ -1,0 +1,17 @@
+GAME_FILE /home/mundhra.ve/poker_thesis/poker-cfrm/games/holdem.limit.2p.18_36.reverse.game
+OUTPUT_PREFIX /home/mundhra.ve/poker_thesis/results/essay2/maniac_18_36_reverse/strategy
+RNG_SEEDS 6 12 1983 28
+CARD_ABSTRACTION FILE:/home/mundhra.ve/poker_thesis/holdem_100b_cfrm.abs
+ACTION_ABSTRACTION NULL
+NUM_THREADS 48
+STATUS_FREQ_SECONDS 60
+DUMP_TIMER 3600 1 3600
+MAX_WALLTIME_SECONDS 428400
+DO_AVERAGE TRUE
+UTILITY_TYPE 1
+ALPHA 5.000000
+BETA 0.000000
+LAMBDA 1.000000
+PARAMETERS_END
+BINARY_FILENAME_PREFIX /home/mundhra.ve/poker_thesis/results/essay2/maniac_18_36_reverse/strategy.iter-42168375k.secs-43200
+PLAYER_END
